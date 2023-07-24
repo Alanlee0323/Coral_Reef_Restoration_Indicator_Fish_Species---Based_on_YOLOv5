@@ -7,6 +7,8 @@ author: [ALAN_LEE]
 
 The quantity of indicator species in coral reefs is a critical reference for coral surveys. However, manual calculation requires a significant amount of human resources and time. Therefore, utilizing artificial intelligence for automated classification and counting is of utmost importance. The objective of this study is to achieve an accuracy of over 85% in correctly identifying common designated indicator fish species (Parrotfish, Snappers, Butterflyfish, Groupers, and Wrasses) in the Northeastern coastline. Additionally, the accuracy for other fish species should be above 80%. This approach not only reduces the training time for identification personnel but also enables continuous monitoring, potentially allowing for real-time surveillance 24 hours a day.
 
+<img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/48ed7f44-3f46-46dd-b363-b33118f5b472" width="800">
+
 <br>
 
 ## Description
@@ -34,7 +36,6 @@ conda activate 'your_environment_name'
 
 `$pip install labelImg`<br>
 
----
 ### Annotation formats
 * YOLO format in .txt
 **class_num x, y, w, h**<br>
@@ -55,7 +56,7 @@ cd Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5
 pip install -r requirements.txt  # install
 ```
 </details>
-
+<br>
 <details open>
 <summary>Inference with detect.py</summary>
 
@@ -73,13 +74,13 @@ python detect.py --weights weights/Original_Imgsize_1280_batchsize_16_epoch_200_
                                                'https://youtu.be/Zgi9g1ksQHc'  # YouTube
                                                'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
 ```
-<img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/48ed7f44-3f46-46dd-b363-b33118f5b472" width="800">
+<br>
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/6c56843b-1f94-487c-a1d2-3d7a64d7a5bb" width="800">
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/06b458cd-4742-4042-b8a8-3ad23eac892e" width="800">
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/0823e509-b9f5-474a-aa0d-2d40b53b515a" width="800">
 
 </details>
-
+<br>
 <details open>
 <summary>Training</summary>
 
@@ -92,7 +93,7 @@ python train.py --data FIsh/Coral_Reef_Restoration_Indicator_Fish_Species --epoc
 
 </details>
 
-
+<br>
 
 ## Acknowledgements
 NSTC-110-2634-F-019 -002 -
