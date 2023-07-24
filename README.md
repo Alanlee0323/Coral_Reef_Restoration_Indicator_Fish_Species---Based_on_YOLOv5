@@ -10,13 +10,13 @@ The quantity of indicator species in coral reefs is a critical reference for cor
 <br>
 
 ## Description
-This research employs the YOLOv5 algorithm for fish species recognition. The development environment is set up on Anaconda, using Python 3.7 as the programming language, and deep learning is performed using PyTorch 1.2 + CUDA 10.0 as the framework. Training is conducted on the Taiwan AI Cloud Computing (TWCC) server. Transfer Learning is employed during the training process, utilizing the YOLOv5 provided pre-trained weights 'yolov5m.pt' . This approach accelerates the training efficiency and safeguards against weight corruption.
+This research employs the YOLOv5 algorithm for fish species recognition. The development environment is set up on Anaconda, using Python 3.9.0 as the programming language, and deep learning is performed using PyTorch 1.2 + CUDA 10.0 as the framework. Training is conducted on the Taiwan AI Cloud Computing (TWCC) server. Transfer Learning is employed during the training process, utilizing the YOLOv5 provided pre-trained weights 'yolov5m.pt' . This approach accelerates the training efficiency and safeguards against weight corruption.
 
 <br>
 
 ## Environment
 <ul>
-<li>python = 3.7.0</li>
+<li>python = 3.9.0</li>
 <li>CUDA = 10.0</li>
 <li>Pytorch =1.2</li>
 </ul>
@@ -62,7 +62,7 @@ pip install -r requirements.txt  # install
 `detect.py` runs inference on a variety of sources, and saving results to `runs/detect`.
 
 ```bash
-python detect.py --weights Original_Imgsize_1280_batchsize_16_epoch_200_models_yolov5m.pt --source 0                               # webcam
+python detect.py --weights weights/Original_Imgsize_1280_batchsize_16_epoch_200_models_yolov5m.pt --source 0                               # webcam
                                                img.jpg                         # image
                                                vid.mp4                         # video
                                                screen                          # screenshot
