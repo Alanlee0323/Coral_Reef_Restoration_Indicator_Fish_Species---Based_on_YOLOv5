@@ -1,0 +1,18 @@
+# YOLOv5  by Ultralytics, GPL-3.0 license
+# Objects365 dataset https://www.objects365.org/ by Megvii
+# Example usage: python train.py --data Objects365.yaml
+# parent
+# ├── yolov5
+# └── datasets
+#     └── Objects365  ← downloads here (712 GB = 367G data + 345G zips)
+
+
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+train: ../Fish/images/train  # train images (relative to 'path') 1742289 images
+val: ../Fish/images/val # val images (relative to 'path') 80000 images
+
+# Classes
+nc: 7  # number of classes
+names: ['0_Ep','1_Lu','2_Pl','3_Sc','4_Cr','5_others','6_Pc']
+
+

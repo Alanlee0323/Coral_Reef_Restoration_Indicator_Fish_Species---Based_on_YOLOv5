@@ -1,0 +1,37 @@
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+# Objects365 dataset https://www.objects365.org/ by Megvii
+# Example usage: python train.py --data Objects365.yaml
+# parent
+# ├── yolov5
+# └── datasets
+#     └── Objects365  ← downloads here (712 GB = 367G data + 345G zips)
+
+
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+train: ../Fish/images/train  # train images (relative to 'path') 1742289 images
+val: ../Fish/images/train # val images (relative to 'path') 80000 images
+
+# Classes
+nc: 88  # number of classes
+names: ['0_Chromis_fumea','1_Pomacentrus_coelestis','2_Dascyllus_trimaculatus','3_Chromis_notata'
+,'4_Chaetodon_auripes','5_Coradion_altivelis','6_Chaetodon_octofasciatus','7_Chaetodon_kleinii','8_Heniochus_singularius',
+'9_Heniochus_acuminatus','10_Chaetodon_weibeli','11_Chaetodon_auriga','12_Chaetodon_lunula','13_Chaetodon_lunulatus','14_Scarus_ghobban',
+'15_Chlorurus_japanensis','16_Scarus_schlegeli','17_Chlorurus_sordidus','18_Scarus_rivulatus','19_Cephalopholis_boenak',
+'20_Diploprion_bifasciatum','21_Pseudanthias_squamipinnis','22','23_Cheilinus_chlorourus','24_Halichoeres_melanochir','25_Oxycheilinus_unifasciatus',
+'26_Stethojulis_terina','27_Labroides_dimidiatus','28_Bodianus_diana','29_Hemigymnus_fasciatus',
+'30_Thalassoma_lunare','31_Cirrhilabrus_cyanopleura','32_Pteragogus_aurigarius','33_Bodianus_mesothorax',
+'34_Choerodon_azurio','35_Pseudolabrus_eoethinus','36_Choerodon_schoenleinii','37_Aulostomus_chinensis',
+'38_Chelonia_mydas','39_Diodon_holocanthus','40_Diodon_liturosus','41_Diodon_eydouxi','42_Prionurus_scalprum',
+'43_Acanthurus_dussumieri,','44_Scolopsis_vosmeri','45_Centropyge_vrolikii','46_Chaetodontoplus_septentrionalis',
+'47_Scorpaenopsis_diabolus','48_Dendrochirus_zebra','49_Pterocaesio_digramma','50_Lethrinus_nebulosus',
+'51_Sufflamen_bursa','52_Canthigaster_axiologus','53_Gymnothorax_thyrsoideus','54_Lutjanus_russellii',
+'55_Lutjanus_vitta','56_Pervagor_janthinosoma','57_Ostracion_cubicus','58_Octopus_cyanea','59_Sepia_pharaonis',
+'60_Parupeneus_multifasciatus','61_Pomacanthus_semicirculatus','62_Oplegnathus_punctatus','63_Synodus_variegatus',
+'64_Microcanthus_strigatus','65_Hybrid_Epinephelus','66_Other_Serranidae','67_Other_Lutjanidae','68_Other_Chaetodontidae',
+'69_Other_Scaridae','70_Cromileptes_altivelis','71_Cheilinus_undulatus','72_Bolbometopon_muricatum','73_Heniochus_diphreutes',
+'74_Petroscirtes_breviceps','75_Oxycheilinus_digramma','76_unknown','77_Lutjanus_lutjanus','78_Chaetodon_speculum',
+'79_Stephanolepis_cirrhifer','80_Planiliza_macrolepis','81_Diagramma_pictum','82_Canthigaster_rivulata','83_Monacanthus_chinensis',
+'84_Siganus_fuscescens','85_Gymnothorax_favagineus','86_Echeneis_naucrates','87_Mugil_cephalus']
+
+
+
