@@ -31,7 +31,7 @@ pip install -r requirements.txt  # install
 ```
 </details>
 
-<details>
+<details open>
 <summary>Inference with detect.py</summary>
 
 `detect.py` runs inference on a variety of sources, and saving results to `runs/detect`.
@@ -48,27 +48,23 @@ python detect.py --weights Original_Imgsize_1280_batchsize_16_epoch_200_models_y
                                                'https://youtu.be/Zgi9g1ksQHc'  # YouTube
                                                'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
 ```
-<details>
-<summary>Training</summary>
-
-The commands below reproduce YOLOv5 [COCO](https://github.com/ultralytics/yolov5/blob/master/data/scripts/get_coco.sh)
-results. [Models](https://github.com/ultralytics/yolov5/tree/master/models)
-and [datasets](https://github.com/ultralytics/yolov5/tree/master/data) download automatically from the latest
-YOLOv5 [release](https://github.com/ultralytics/yolov5/releases). Training times for YOLOv5n/s/m/l/x are
-1/2/4/6/8 days on a V100 GPU ([Multi-GPU](https://docs.ultralytics.com/yolov5/tutorials/multi_gpu_training) times faster). Use the
-largest `--batch-size` possible, or pass `--batch-size -1` for
-YOLOv5 [AutoBatch](https://github.com/ultralytics/yolov5/pull/5092). Batch sizes shown for V100-16GB.
-
-```bash
-python train.py --data coco.yaml --epochs 300 --weights '' --cfg yolov5n.yaml  --batch-size 128
-                                                                 yolov5s                    64
-                                                                 yolov5m                    40
-                                                                 yolov5l                    24
-                                                                 yolov5x                    16
-```
-
-<img width="800" src="https://user-images.githubusercontent.com/26833433/90222759-949d8800-ddc1-11ea-9fa1-1c97eed2b963.png">
+![P3-2021-10-05-08-00 mp4_000056 000](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/48ed7f44-3f46-46dd-b363-b33118f5b472)
+![P4-2021-09-24-12-00 mp4_001023 400](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/b46d0388-9353-48db-a9d4-5bb39ced4f78)
+![P4-2021-09-24-12-00 mp4_001023 400](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/7a455642-1e1e-4f54-bfed-55201a77ee88)
+![P1-2021-09-23-12-00 mp4_000731 769](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/6c56843b-1f94-487c-a1d2-3d7a64d7a5bb)
+![2022-06-14-0630-0700_視長 mp4_20220728_115850 457](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/06b458cd-4742-4042-b8a8-3ad23eac892e)
 
 </details>
 
 <details open>
+<summary>Training</summary>
+
+
+```bash
+python train.py --data FIsh/Coral_Reef_Restoration_Indicator_Fish_Species --epochs 200 --weights '' --cfg yolov5m.yaml  --batch-size 128
+```
+
+![](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/ecdd3916-e81a-43c6-b631-056827ca9e0a)
+
+</details>
+
