@@ -22,7 +22,7 @@ This research employs the YOLOv5 algorithm for fish species recognition. The dev
 </ul>
 
 ```
-conda create -n 'your_environment_name' python=3.7.0
+conda create -n 'your_environment_name' python=3.9.0
 conda activate 'your_environment_name'
 ```
 
