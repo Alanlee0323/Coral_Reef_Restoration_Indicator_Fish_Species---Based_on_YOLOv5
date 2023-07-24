@@ -69,7 +69,6 @@ python detect.py --weights Original_Imgsize_1280_batchsize_16_epoch_200_models_y
                                                'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
 ```
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/48ed7f44-3f46-46dd-b363-b33118f5b472" width="800">
-<img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/6c56843b-1f94-487c-a1d2-3d7a64d7a5bb)"width="800">
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/6c56843b-1f94-487c-a1d2-3d7a64d7a5bb" width="800">
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/06b458cd-4742-4042-b8a8-3ad23eac892e" width="800">
 <img src="https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/0823e509-b9f5-474a-aa0d-2d40b53b515a" width="800">
