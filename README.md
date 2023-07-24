@@ -51,6 +51,7 @@ conda activate 'your_environment_name'
 <summary>Install</summary>
 
 ```bash
+conda install git
 git clone https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5  # clone
 cd Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5
 pip install -r requirements.txt  # install
