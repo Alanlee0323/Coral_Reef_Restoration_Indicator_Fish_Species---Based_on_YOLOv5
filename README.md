@@ -85,7 +85,7 @@ python detect.py --weights weights/Original_Imgsize_1280_batchsize_16_epoch_200_
 
 
 ```bash
-python train.py --data FIsh/Coral_Reef_Restoration_Indicator_Fish_Species --epochs 200 --cfg ./models/yolov5s.yaml --weights weights/yolov5m.pt  --batch-size 32
+python train.py --data FIsh/Coral_Reef_Restoration_Indicator_Fish_Species --epochs 200 --cfg ./models/yolov5s.yaml --weights weights/yolov5m.pt  --batch-size 16
 ```
 
 ![](https://github.com/Alanlee0323/Coral_Reef_Restoration_Indicator_Fish_Species---Based_on_YOLOv5/assets/95911604/ecdd3916-e81a-43c6-b631-056827ca9e0a)
