@@ -21,6 +21,11 @@ This research employs the YOLOv5 algorithm for fish species recognition. The dev
 <li>Pytorch =1.2</li>
 </ul>
 
+```
+conda create -n 'your_environment_name' python=3.7.0
+conda activate 'your_environment_name'
+```
+
 <br>
 
 ## Image Annotation
