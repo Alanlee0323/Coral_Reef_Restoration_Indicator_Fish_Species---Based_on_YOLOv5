@@ -1,4 +1,4 @@
-# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+# YOLOv5  by Ultralytics, GPL-3.0 license
 """
 Plotting utils
 """
@@ -20,10 +20,9 @@ import torch
 from PIL import Image, ImageDraw, ImageFont
 
 from utils import TryExcept, threaded
-from utils.general import (CONFIG_DIR, FONT, LOGGER, check_font, check_requirements, clip_boxes, increment_path,
+from utils.general import (CONFIG_DIR, FONT, LOGGER, check_font, check_requirements, clip_coords, increment_path,
                            is_ascii, xywh2xyxy, xyxy2xywh)
 from utils.metrics import fitness
-from utils.segment.general import scale_image
 
 # Settings
 RANK = int(os.getenv('RANK', -1))
@@ -67,21 +66,47 @@ def check_pil_font(font=FONT, size=10):
         except URLError:  # not online
             return ImageFont.load_default()
 
+def paint_chinese_opencv(im,chinese,pos,color):
+    img_PIL = Image.fromarray(cv2.cvtColor(im,cv2.COLOR_BGR2RGB))
+    font = ImageFont.truetype('TaipeiSansTCBeta-Regular.ttf',50)
+    fillColor = color #(255,0,0)
+    position = pos #(100,100)
+    if not isinstance(chinese,str):
+        chinese = chinese.decode('utf-8')
+    draw = ImageDraw.Draw(img_PIL)
+    draw.text(position,chinese,font=font,fill=fillColor)
+ 
+    img = cv2.cvtColor(np.asarray(img_PIL),cv2.COLOR_RGB2BGR)
+    return img
 
 class Annotator:
     # YOLOv5 Annotator for train/val mosaics and jpgs and detect/hub inference annotations
-    def __init__(self, im, line_width=None, font_size=None, font='Arial.ttf', pil=False, example='abc'):
+    def __init__(self, im, line_width=None, font_size=None, font='TaipeiSansTCBeta-Regular.ttff', pil=False, example='abc'):
         assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images.'
         non_ascii = not is_ascii(example)  # non-latin labels, i.e. asian, arabic, cyrillic
         self.pil = pil or non_ascii
         if self.pil:  # use PIL
             self.im = im if isinstance(im, Image.Image) else Image.fromarray(im)
             self.draw = ImageDraw.Draw(self.im)
-            self.font = check_pil_font(font='Arial.Unicode.ttf' if non_ascii else font,
+            self.font = check_pil_font(font='TaipeiSansTCBeta-Regular.ttf' if non_ascii else font,
                                        size=font_size or max(round(sum(self.im.size) / 2 * 0.035), 12))
         else:  # use cv2
             self.im = im
         self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
+
+    '''def paint_chinese_opencv(self, box, chinese,pos,color):
+        #im1=cv2.imread(self.im)
+        img_PIL = Image.fromarray(cv2.cvtColor(self.im,cv2.COLOR_BGR2RGB))
+        font = ImageFont.truetype('TaipeiSansTCBeta-Regular.ttf',25)
+        fillColor = color #(255,0,0)
+        position = pos #(100,100)
+        if not isinstance(chinese,str):
+            chinese = chinese.decode('utf-8')
+        draw = ImageDraw.Draw(img_PIL)
+        draw.text(position,chinese,font=font,fill=fillColor)
+ 
+        img = cv2.cvtColor(np.asarray(img_PIL),cv2.COLOR_RGB2BGR)
+        return img'''
 
     def box_label(self, box, label='', color=(128, 128, 128), txt_color=(255, 255, 255)):
         # Add one xyxy box to image with label
@@ -101,7 +126,7 @@ class Annotator:
             p1, p2 = (int(box[0]), int(box[1])), (int(box[2]), int(box[3]))
             cv2.rectangle(self.im, p1, p2, color, thickness=self.lw, lineType=cv2.LINE_AA)
             if label:
-                tf = max(self.lw - 1, 1)  # font thickness
+                tf = max(self.lw - 1, 1) # font thickness
                 w, h = cv2.getTextSize(label, 0, fontScale=self.lw / 3, thickness=tf)[0]  # text width, height
                 outside = p1[1] - h >= 3
                 p2 = p1[0] + w, p1[1] - h - 3 if outside else p1[1] + h + 3
@@ -113,52 +138,65 @@ class Annotator:
                             txt_color,
                             thickness=tf,
                             lineType=cv2.LINE_AA)
+                
 
-    def masks(self, masks, colors, im_gpu=None, alpha=0.5):
-        """Plot masks at once.
-        Args:
-            masks (tensor): predicted masks on cuda, shape: [n, h, w]
-            colors (List[List[Int]]): colors for predicted masks, [[r, g, b] * n]
-            im_gpu (tensor): img is in cuda, shape: [3, h, w], range: [0, 1]
-            alpha (float): mask transparency: 0.0 fully transparent, 1.0 opaque
-        """
-        if self.pil:
-            # convert to numpy first
-            self.im = np.asarray(self.im).copy()
-        if im_gpu is None:
-            # Add multiple masks of shape(h,w,n) with colors list([r,g,b], [r,g,b], ...)
-            if len(masks) == 0:
-                return
-            if isinstance(masks, torch.Tensor):
-                masks = torch.as_tensor(masks, dtype=torch.uint8)
-                masks = masks.permute(1, 2, 0).contiguous()
-                masks = masks.cpu().numpy()
-            # masks = np.ascontiguousarray(masks.transpose(1, 2, 0))
-            masks = scale_image(masks.shape[:2], masks, self.im.shape)
-            masks = np.asarray(masks, dtype=np.float32)
-            colors = np.asarray(colors, dtype=np.float32)  # shape(n,3)
-            s = masks.sum(2, keepdims=True).clip(0, 1)  # add all masks together
-            masks = (masks @ colors).clip(0, 255)  # (h,w,n) @ (n,3) = (h,w,3)
-            self.im[:] = masks * alpha + self.im * (1 - s * alpha)
+    def absdiff(self, box, path):
+        if path.find('P1') != -1:  #放背景的圖片路徑
+            baseImg = cv2.imread("C:\\Users\\which\\which_project\\data\\fish\\background\\ang1_Trim.png")
+        elif path.find('P2') != -1:
+            baseImg = cv2.imread("C:\\Users\\which\\which_project\\data\\fish\\background\\ang2_Trim.png")
+        elif path.find('P3') != -1:
+            baseImg = cv2.imread("C:\\Users\\which\\which_project\\data\\fish\\background\\ang3_Trim.png")
+        elif path.find('P4') != -1:
+            baseImg = cv2.imread("C:\\Users\\which\\which_project\\data\\fish\\background\\ang4_Trim.png")
+        else :
+            return 1
+        curImg = self.im
+        
+        y1 = int(box[1])
+        y2 = int(box[3])
+        x1 = int(box[0])
+        x2 = int(box[2])
+        cropback=baseImg[y1:y2,x1:x2]
+        crop=curImg[y1:y2,x1:x2]
+        
+
+        #抓圖片的大小
+        sh=crop.shape
+        total= sh[0]* sh[1] #總共有多少像素
+        # 转灰度图
+        gray_base = cv2.cvtColor(cropback, cv2.COLOR_BGR2GRAY)
+        gray_cur = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            
+        resImg = cv2.absdiff(gray_cur, gray_base)  #轉完灰階的兩個圖相減
+        ret,thresh1 = cv2.threshold(resImg,10,255,cv2.THRESH_BINARY)  #轉為黑白二質化的圖
+        contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) #找白色區域的輪廓(相異的區
+        
+        area=0
+        # 計算白色總面積
+        for i in range(len(contours)):  
+            if cv2.contourArea(contours[i])>10:
+                area += cv2.contourArea(contours[i])
+   
+        percent=(area/total)*100  #算白色的百分比
+        if(percent > 30):
+            return 1
         else:
-            if len(masks) == 0:
-                self.im[:] = im_gpu.permute(1, 2, 0).contiguous().cpu().numpy() * 255
-            colors = torch.tensor(colors, device=im_gpu.device, dtype=torch.float32) / 255.0
-            colors = colors[:, None, None]  # shape(n,1,1,3)
-            masks = masks.unsqueeze(3)  # shape(n,h,w,1)
-            masks_color = masks * (colors * alpha)  # shape(n,h,w,3)
+            return 0
+                
 
-            inv_alph_masks = (1 - masks * alpha).cumprod(0)  # shape(n,h,w,1)
-            mcs = (masks_color * inv_alph_masks).sum(0) * 2  # mask color summand shape(n,h,w,3)
+    def count_total( self, box, num0, num1, num2, num3, num4, num5, num6 ):
+        cv2.rectangle(self.im, (0,150), (250,520), (0,0,0), -1) 
+        cv2.putText(self.im, 'Ep:%d'%( num0), (30,190),  0, self.lw / 2,(255,255,255),3)
+        cv2.putText(self.im, 'Lu:%d'%( num1), (30,240),  0, self.lw / 2,(255,255,255),3)
+        cv2.putText(self.im, 'Pl:%d'%( num2), (30,290), 0, self.lw / 2, (255,255,255),3)
+        cv2.putText(self.im, 'Sc:%d'%( num3), (30,340), 0, self.lw / 2, (255,255,255),3)
+        cv2.putText(self.im, 'Cr:%d'%( num4), (30,390), 0, self.lw / 2, (255,255,255),3)
+        cv2.putText(self.im, 'Others:%d'%( num5), (30,440), 0, self.lw / 2, (255,255,255),3)
+        cv2.putText(self.im, 'Pc:%d'%( num6), (30,490), 0, self.lw / 2, (255,255,255),3)
 
-            im_gpu = im_gpu.flip(dims=[0])  # flip channel
-            im_gpu = im_gpu.permute(1, 2, 0).contiguous()  # shape(h,w,3)
-            im_gpu = im_gpu * inv_alph_masks[-1] + mcs
-            im_mask = (im_gpu * 255).byte().cpu().numpy()
-            self.im[:] = scale_image(im_gpu.shape, im_mask, self.im.shape)
-        if self.pil:
-            # convert im back to PIL and update draw
-            self.fromarray(self.im)
+        
+        
 
     def rectangle(self, xy, fill=None, outline=None, width=1):
         # Add rectangle to image (PIL-only)
@@ -170,11 +208,6 @@ class Annotator:
             w, h = self.font.getsize(text)  # text width, height
             xy[1] += 1 - h
         self.draw.text(xy, text, fill=txt_color, font=self.font)
-
-    def fromarray(self, im):
-        # Update self.im from a numpy array
-        self.im = im if isinstance(im, Image.Image) else Image.fromarray(im)
-        self.draw = ImageDraw.Draw(self.im)
 
     def result(self):
         # Return annotated image as array
@@ -204,6 +237,7 @@ def feature_visualization(x, module_type, stage, n=32, save_dir=Path('runs/detec
                 ax[i].axis('off')
 
             LOGGER.info(f'Saving {f}... ({n}/{channels})')
+            plt.title('Features')
             plt.savefig(f, dpi=300, bbox_inches='tight')
             plt.close()
             np.save(str(f.with_suffix('.npy')), x[0].cpu().numpy())  # npy save
@@ -231,31 +265,26 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
     return filtfilt(b, a, data)  # forward-backward filter
 
 
-def output_to_target(output, max_det=300):
-    # Convert model output to target format [batch_id, class_id, x, y, w, h, conf] for plotting
+def output_to_target(output):
+    # Convert model output to target format [batch_id, class_id, x, y, w, h, conf]
     targets = []
     for i, o in enumerate(output):
-        box, conf, cls = o[:max_det, :6].cpu().split((4, 1, 1), 1)
-        j = torch.full((conf.shape[0], 1), i)
-        targets.append(torch.cat((j, cls, xyxy2xywh(box), conf), 1))
-    return torch.cat(targets, 0).numpy()
+        targets.extend([i, cls, *list(*xyxy2xywh(np.array(box)[None])), conf] for *box, conf, cls in o.cpu().numpy())
+    return np.array(targets)
 
 
 @threaded
-def plot_images(images, targets, paths=None, fname='images.jpg', names=None):
+def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max_size=1920, max_subplots=16):
     # Plot image grid with labels
     if isinstance(images, torch.Tensor):
         images = images.cpu().float().numpy()
     if isinstance(targets, torch.Tensor):
         targets = targets.cpu().numpy()
-
-    max_size = 1920  # max image size
-    max_subplots = 16  # max image subplots, i.e. 4x4
+    if np.max(images[0]) <= 1:
+        images *= 255  # de-normalise (optional)
     bs, _, h, w = images.shape  # batch size, _, height, width
     bs = min(bs, max_subplots)  # limit plot images
     ns = np.ceil(bs ** 0.5)  # number of subplots (square)
-    if np.max(images[0]) <= 1:
-        images *= 255  # de-normalise (optional)
 
     # Build Image
     mosaic = np.full((int(ns * h), int(ns * w), 3), 255, dtype=np.uint8)  # init
@@ -565,7 +594,7 @@ def save_one_box(xyxy, im, file=Path('im.jpg'), gain=1.02, pad=10, square=False,
         b[:, 2:] = b[:, 2:].max(1)[0].unsqueeze(1)  # attempt rectangle to square
     b[:, 2:] = b[:, 2:] * gain + pad  # box wh * gain + pad
     xyxy = xywh2xyxy(b).long()
-    clip_boxes(xyxy, im.shape)
+    clip_coords(xyxy, im.shape)
     crop = im[int(xyxy[0, 1]):int(xyxy[0, 3]), int(xyxy[0, 0]):int(xyxy[0, 2]), ::(1 if BGR else -1)]
     if save:
         file.parent.mkdir(parents=True, exist_ok=True)  # make directory
