@@ -62,7 +62,7 @@ pip install -r requirements.txt  # install
 `detect.py` runs inference on a variety of sources, and saving results to `runs/detect`.
 
 ```bash
-python detect.py --weights weights/Original_Imgsize_1280_batchsize_16_epoch_200_models_yolov5m.pt --source 0                               # webcam
+python detect.py --weights weights/Original_Imgsize_1280_batchsize_16_epoch_200_models_yolov5m.pt --source https://www.youtube.com/watch?v=8_EygRvwzrY # demo Youtube video                            
                                                img.jpg                         # image
                                                vid.mp4                         # video
                                                screen                          # screenshot
