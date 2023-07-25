@@ -15,7 +15,7 @@ Usage - formats:
     $ python detect.py --weights yolov5s.pt                 # PyTorch
                                  yolov5s.torchscript        # TorchScript
                                  yolov5s.onnx               # ONNX Runtime or OpenCV DNN with --dnn
-                                 yolov5s_openvino_model     # OpenVINO
+                                 yolov5s.xml                # OpenVINO
                                  yolov5s.engine             # TensorRT
                                  yolov5s.mlmodel            # CoreML (macOS-only)
                                  yolov5s_saved_model        # TensorFlow SavedModel
@@ -26,6 +26,7 @@ Usage - formats:
 """
 
 import argparse
+from itertools import count
 import os
 import platform
 import sys
@@ -40,17 +41,42 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from models.common import DetectMultiBackend
-from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
+from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadStreams
 from utils.general import (LOGGER, Profile, check_file, check_img_size, check_imshow, check_requirements, colorstr, cv2,
-                           increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
+                           increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
+'''import cv2
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont'''
+
+
+'''import contextlib
+import math
+import os
+from copy import copy
+from pathlib import Path
+from urllib.error import URLError'''
+
+'''import cv2
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sn
+import torch
+from PIL import Image, ImageDraw, ImageFont
+
+from utils import TryExcept, threaded
+from utils.general import (CONFIG_DIR, FONT, LOGGER, check_font, check_requirements, clip_coords, increment_path,
+                           is_ascii, xywh2xyxy, xyxy2xywh)
+from utils.metrics import fitness'''
 
 
 @smart_inference_mode()
 def run(
-        weights=ROOT / 'yolov5s.pt',  # model path or triton URL
-        source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
+        weights=ROOT / 'yolov5m.pt',  # model.pt path(s)
+        source=ROOT / 'data/images',  # file/dir/URL/glob, 0 for webcam
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
@@ -82,7 +108,6 @@ def run(
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
     webcam = source.isnumeric() or source.endswith('.txt') or (is_url and not is_file)
-    screenshot = source.lower().startswith('screen')
     if is_url and is_file:
         source = check_file(source)  # download
 
@@ -97,23 +122,21 @@ def run(
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
     # Dataloader
-    bs = 1  # batch_size
     if webcam:
-        view_img = check_imshow(warn=True)
+        view_img = check_imshow()
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
-        bs = len(dataset)
-    elif screenshot:
-        dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
+        bs = len(dataset)  # batch_size
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
+        bs = 1  # batch_size
     vid_path, vid_writer = [None] * bs, [None] * bs
 
     # Run inference
-    model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
+    model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     for path, im, im0s, vid_cap, s in dataset:
         with dt[0]:
-            im = torch.from_numpy(im).to(model.device)
+            im = torch.from_numpy(im).to(device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
             im /= 255  # 0 - 255 to 0.0 - 1.0
             if len(im.shape) == 3:
@@ -144,20 +167,97 @@ def run(
             save_path = str(save_dir / p.name)  # im.jpg
             txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # im.txt
             s += '%gx%g ' % im.shape[2:]  # print string
+            #cou = " "
+            cou0 = 0
+            cou1 = 0
+            cou2 = 0
+            cou3 = 0
+            cou4 = 0
+            cou5 = 0
+            cou6 = 0
+            cou7 = 0
+            number=0
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
                 # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
+                det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0.shape).round()
 
                 # Print results
-                for c in det[:, 5].unique():
-                    n = (det[:, 5] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += f"{n} {names[int(c)]}, "  # add to string
+                    #cou += f"{n} {names[int(c)]}{'s' * (n > 1)}, "
+                    #print(type(s))
+                    if s.find('6_Pc') != -1 :
+                        cou6 = n
+                        #print("6=%d"%n)
+                    elif s.find('5_others') != -1 :
+                        cou5 = n
+                        #print("5=%d"%n)
+                    elif s.find('4_Cr') != -1 :
+                        cou4 = n
+                        #print("4=%d"%n)
+                    elif s.find('3_Sc') != -1 :
+                        cou3 = n
+                        #print("3=%d"%n)
+                    elif s.find('2_Pl') != -1 :
+                        cou2 = n
+                        #print("2=%d"%n)
+                    elif s.find('1_Lu') != -1 :
+                        cou1 = n
+                        #print("1=%d"%n)
+                    elif s.find('0_Ep') != -1 :
+                        cou0 = n
+                        #print("0=%d"%n)
+
+     
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
+                    #backgroung cutting
+                    thereis = annotator.absdiff(xyxy,txt_path)
+
+                    #listing tracking
+                    if (thereis == 1):
+                        global tracking
+
+                        print('xyxy=',xyxy)
+                        x1 = int(xyxy[0])
+                        y1 = int(xyxy[1])
+                        x2 = int(xyxy[2])
+                        y2 = int(xyxy[3])
+                        c = int(cls)
+                        track_label = None if hide_labels else (names[c])
+                        tracking.append([track_label,x1,y1,x2,y2,0, conf, cls])##[label,x1,y1,xlenght,ylenght,number,存在時間,*xyxy, conf, cls]
+                        #all_fish[number]=[label,x1,y1,xlenght,ylenght,number,存在時間,累計消失時間,當前frame有沒有出現過,*xyxy, conf, cls]
+                            
+                        print(tracking[number][0],tracking[number][1],':',tracking[number][2]," ",tracking[number][3],":",tracking[number][4],'No.',number,)
+                        number += 1
+
+                    #backgroung cutting
+                    thereis = annotator.absdiff(xyxy,txt_path)
+                    
+                    if (thereis == 0):
+                        if cls==0:
+                            cou0 -= 1
+                        elif cls==1:
+                            cou1 -= 1
+                        elif cls==2:
+                            cou2 -= 1
+                        elif cls==3:
+                            cou3 -= 1
+                        elif cls==4:
+                            cou4 -= 1
+                        elif cls==5:
+                            cou5 -= 1
+                        elif cls==6:
+                            cou6 -= 1
+                        continue
+                        
+                    annotator.count_total(xyxy, cou0, cou1, cou2, cou3, cou4, cou5, cou6)
+                        
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
@@ -168,8 +268,12 @@ def run(
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                         annotator.box_label(xyxy, label, color=colors(c, True))
+
+                        
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
+
+
 
             # Stream results
             im0 = annotator.result()
@@ -202,6 +306,7 @@ def run(
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+        #print(cou)
 
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
@@ -211,12 +316,14 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
+    
+
 
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path or triton URL')
-    parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob/screen/0(webcam)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5m.pt', help='model path(s)')
+    parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='(optional) dataset.yaml path')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
@@ -250,9 +357,13 @@ def parse_opt():
 
 def main(opt):
     check_requirements(exclude=('tensorboard', 'thop'))
+    global all_fish
     run(**vars(opt))
 
 
 if __name__ == "__main__":
+    tracking=[]
+    all_fish=[]
+    fish_num=0
     opt = parse_opt()
     main(opt)
